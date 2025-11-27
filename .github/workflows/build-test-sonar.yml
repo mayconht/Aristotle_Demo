@@ -1,0 +1,172 @@
+name: Build, Test & SonarCloud
+
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        description: '.NET version to use'
+        required: false
+        type: string
+        default: '8.0.x'
+      build-configuration:
+        description: 'Build configuration (Release/Debug)'
+        required: false
+        type: string
+        default: 'Release'
+      sonar-organization:
+        description: 'SonarCloud organization'
+        required: false
+        type: string
+        default: 'personalprojcts'
+      sonar-project-key:
+        description: 'SonarCloud project key'
+        required: false
+        type: string
+        default: 'mayconht_Aristotle_Study'
+      test-project-path:
+        description: 'Path to the test project'
+        required: false
+        type: string
+        default: 'USR/UserServiceTests/UserService.UnitTests.csproj'
+      solution-path:
+        description: 'Path to the solution file'
+        required: false
+        type: string
+        default: 'Aristotle_Study.sln'
+      build-artifact-name:
+        description: 'Name for the build artifact'
+        required: true
+        type: string
+
+jobs:
+  build-test-sonar:
+    name: Build, Test & SonarCloud Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    env:
+      APP_PORT: 3000
+      ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=test_db;Username=test;Password=test"
+      Authentication__Keycloak__Authority: "http://localhost:8080/realms/userservice"
+      Authentication__Keycloak__ClientSecret: "test-secret"
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: Cache SonarCloud scanner
+      id: cache-sonar-scanner
+      uses: actions/cache@v4
+      with:
+        path: ./.sonar/scanner
+        key: ${{ runner.os }}-sonar-scanner
+        restore-keys: ${{ runner.os }}-sonar-scanner
+
+    - name: Install SonarCloud scanner
+      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ./.sonar/scanner
+        dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ inputs.solution-path }}
+
+    - name: Create test results directory
+      run: mkdir -p ./TestResults/UserService
+  
+    - name: Begin SonarCloud analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+          /k:"${{ inputs.sonar-project-key }}" \
+          /o:"${{ inputs.sonar-organization }}" \
+          /d:sonar.token="$SONAR_TOKEN" \
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.projectBaseDir="${GITHUB_WORKSPACE}" \
+          /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml" \
+          /d:sonar.coverage.exclusions="**/Program.cs,**/Migrations/**/*,**/*.DevTools/**/*,**/Tests/**/*,**/*.UnitTests/**/*,**/Infrastructure/Config/**/*" \
+          /d:sonar.exclusions="**/Tests/**/*,**/bin/**,**/obj/**,**/Migrations/**,**/*.Designer.cs,**/Program.cs"
+
+    - name: Build solution
+      run: dotnet build ${{ inputs.solution-path }} --configuration ${{ inputs.build-configuration }} --no-restore
+
+    - name: Run unit tests with coverage
+      run: |
+        echo "Running tests..."
+        dotnet test ${{ inputs.test-project-path }} \
+          --configuration ${{ inputs.build-configuration }} \
+          --no-restore \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults/UserService \
+          --logger trx \
+          --settings coverlet.runsettings \
+          --verbosity normal
+
+        echo "Test execution completed. Checking results directory..."
+        ls -laR ./TestResults/UserService/ || echo "Failed to list TestResults"
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf
+      if: always()
+      with:
+        files: TestResults/UserService/**/*.trx
+        check_name: Test Results - UserService
+
+    - name: Process coverage files for SonarCloud
+      run: |
+        echo "Processing coverage files..."
+        echo "Listing TestResults directory:"
+        ls -la ./TestResults/UserService/ || echo "TestResults directory not found"
+
+        echo "Searching for coverage files:"
+        find ./TestResults/UserService -name "*.xml" -type f || echo "No XML files found"
+
+        if [ -d "./TestResults/UserService" ]; then
+          find ./TestResults/UserService -name "coverage.opencover.xml" -exec cp {} ./coverage.opencover.xml \;
+          ls -la ./coverage.opencover.xml || echo " Coverage file not found after copy"
+        else
+          echo "TestResults directory not found"
+        fi
+
+    - name: End SonarCloud analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+    - name: Upload build artifacts for integration tests
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.build-artifact-name }}
+        path: |
+          **/bin/${{ inputs.build-configuration }}/**
+          **/obj/**
+          USR/UserService/Dockerfile.ci
+        retention-days: 1

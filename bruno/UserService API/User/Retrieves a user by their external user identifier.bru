@@ -1,0 +1,22 @@
+meta {
+  name: Retrieves a user by their external user identifier.
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/User/external/:externalUserId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  externalUserId: {{externalUserId}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+  res.body.externalUserId: eq {{externalUserId}}
+  res.body.createdAt: isDefined
+}

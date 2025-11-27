@@ -1,0 +1,29 @@
+meta {
+  name: Retrieves the current authenticated user and their claims.
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/User/me
+  body: none
+  auth: inherit
+}
+
+vars:post-response {
+  externalUserId: res.body.user.externalUserId
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+  res.body.claims: isJson
+  res.body.claims.sub: isNotEmpty
+  res.body.claims.name: eq service-account-userservice-api
+  res.body.claims.roles: isArray
+  res.body.claims.roles: contains default-roles-userservice
+  res.body.claims.roles: contains offline_access
+  res.body.claims.roles: contains uma_authorization
+  res.body.user.externalUserId: isNotEmpty
+  res.body.user.createdAt: isDefined
+}

@@ -1,0 +1,278 @@
+name: Integration Tests
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: 'Name of the microservice'
+        required: true
+        type: string
+      service-path:
+        description: 'Path to the service directory (e.g., USR/UserService)'
+        required: true
+        type: string
+      docker-image-name:
+        description: 'Docker image name for the service'
+        required: true
+        type: string
+      bruno-path:
+        description: 'Path to Bruno test collection'
+        required: true
+        type: string
+      dotnet-version:
+        description: '.NET version to use'
+        required: false
+        type: string
+        default: '8.0.x'
+      build-artifact-name:
+        description: 'Name of the build artifact to download'
+        required: true
+        type: string
+      app-port:
+        description: 'Port to expose the service on'
+        required: false
+        type: number
+        default: 3000
+      keycloak-port:
+        description: 'Port for Keycloak'
+        required: false
+        type: number
+        default: 8080
+
+jobs:
+  integration-test:
+    name: Integration Tests - ${{ inputs.service-name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    env:
+      BRUNO_PATH: ${{ inputs.bruno-path }}
+      KEYCLOAK_PORT: ${{ inputs.keycloak-port }}
+      APP_PORT: ${{ inputs.app-port }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Cache Bruno CLI
+      uses: actions/cache@v4
+      id: cache-bruno
+      with:
+        path: /usr/local/lib/node_modules/@usebruno
+        key: ${{ runner.os }}-bruno-cli-2.13.2
+        restore-keys: ${{ runner.os }}-bruno-cli-2.13.2
+
+    - name: Install Bruno CLI
+      if: steps.cache-bruno.outputs.cache-hit != 'true'
+      run: npm install -g @usebruno/cli@2.13.2
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.build-artifact-name }}
+        path: ./artifacts
+
+    - name: Start Keycloak and Postgres with docker-compose
+      run: |
+        echo "Starting Keycloak and Postgres services with docker-compose..."
+        docker compose up -d keycloak
+        echo "Services started successfully"
+
+    - name: Wait for Keycloak to be ready
+      run: |
+        echo "Waiting for Keycloak to be ready..."
+        timeout=30
+        elapsed=0
+        interval=5
+
+        while [ $elapsed -lt $timeout ]; do
+          if curl --output /dev/null --silent --fail http://localhost:${{ env.KEYCLOAK_PORT }}/health/ready; then
+            echo "Keycloak is ready after $elapsed seconds!"
+            exit 0
+          fi
+          echo "Still waiting... ($elapsed/$timeout seconds)"
+          sleep $interval
+          elapsed=$((elapsed + interval))
+        done
+
+        echo "Keycloak failed to become ready within $timeout seconds"
+        docker compose logs keycloak
+        exit 0
+
+    - name: Setup Keycloak configuration
+      id: keycloak-setup
+      run: |
+        echo "Running Keycloak setup..."
+        cd Aristotle.DevTools
+
+        # Run the setup command (now uses fixed secret)
+        dotnet run -- keycloak setup
+
+        # Use the fixed secret defined in KeycloakSetupCommand.cs
+        client_secret="dev-client-secret-12345"
+
+        # Export as output for Bruno tests
+        echo "client_secret=${client_secret}" >> $GITHUB_OUTPUT
+
+        # Mask the secret in logs
+        echo "::add-mask::$client_secret"
+
+        echo "Keycloak setup completed successfully"
+
+    - name: Test Keycloak authentication
+      run: |
+        echo "Testing Keycloak authentication..."
+        cd Aristotle.DevTools
+
+        # Run the Keycloak test command to validate OAuth2 authentication
+        if ! dotnet run -- keycloak test; then
+          echo " Keycloak authentication test failed"
+          exit 1
+        fi
+
+        echo "Keycloak authentication test passed"
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build CI Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ${{ inputs.service-path }}/Dockerfile.ci
+        tags: ${{ inputs.docker-image-name }}
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Start service container
+      env:
+        KEYCLOAK_CLIENT_SECRET: ${{ steps.keycloak-setup.outputs.client_secret }}
+      run: |
+        echo "Starting ${{ inputs.service-name }} with Keycloak integration..."
+
+        # Get the docker-compose network name
+        NETWORK_NAME=$(docker network ls --format "{{.Name}}" | grep -E '(^|_)app-network$' | head -n 1)
+
+        if [ -z "$NETWORK_NAME" ]; then
+          echo " Could not find app-network. Available networks:"
+          docker network ls
+          exit 1
+        fi
+
+        echo "Using network: $NETWORK_NAME"
+
+        docker run -d \
+          --name ${{ inputs.service-name }}_container \
+          --network "$NETWORK_NAME" \
+          -p ${{ env.APP_PORT }}:8080 \
+          -e ASPNETCORE_ENVIRONMENT=Development \
+          -e ASPNETCORE_URLS=http://+:8080 \
+          -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=userservice_db;Username=postgres;Password=password" \
+          -e Authentication__Keycloak__Authority="http://keycloak:8080/realms/userservice" \
+          -e Authentication__Keycloak__ClientSecret="${KEYCLOAK_CLIENT_SECRET}" \
+          ${{ inputs.docker-image-name }}
+
+        echo "${{ inputs.service-name }} container started"
+
+    - name: Wait for service to be ready
+      run: |
+        echo "Waiting for ${{ inputs.service-name }} to be ready..."
+        timeout=120
+        elapsed=0
+        interval=5
+
+        while [ $elapsed -lt $timeout ]; do
+          if curl --output /dev/null --silent --fail http://localhost:${{ env.APP_PORT }}/health; then
+            echo "${{ inputs.service-name }} is ready!"
+            exit 0
+          fi
+          echo "Still waiting... ($elapsed/$timeout seconds)"
+          sleep $interval
+          elapsed=$((elapsed + interval))
+        done
+
+        echo " ${{ inputs.service-name }} failed to become ready within $timeout seconds"
+        docker logs ${{ inputs.service-name }}_container
+        exit 1
+
+    - name: Run Bruno tests
+      env:
+        OAUTH_SECRET: ${{ steps.keycloak-setup.outputs.client_secret }}
+      run: |
+        echo "Running Bruno test collection..."
+        mkdir -p bruno_results
+        cd "$GITHUB_WORKSPACE/$BRUNO_PATH"
+
+        # Run Bruno with the OAuth secret for authentication
+        npx @usebruno/cli run \
+          --env Development \
+          --env-var "OAuthSecret=$OAUTH_SECRET" \
+          --reporter-html "$GITHUB_WORKSPACE/bruno_results/report.html" \
+          --reporter-junit "$GITHUB_WORKSPACE/bruno_results/report.xml"
+
+    - name: Collect service logs on failure
+      if: failure()
+      run: |
+        echo "Collecting service logs..."
+        docker compose logs keycloak > keycloak-logs.txt 2>&1 || echo "Failed to collect Keycloak logs" > keycloak-logs.txt
+        docker compose logs postgres > postgres-logs.txt 2>&1 || echo "Failed to collect Postgres logs" > postgres-logs.txt
+        docker logs ${{ inputs.service-name }}_container > service-logs.txt 2>&1 || echo "Failed to collect service logs" > service-logs.txt
+
+        echo "=== Keycloak Logs ==="
+        cat keycloak-logs.txt 2>/dev/null || echo "No Keycloak logs available"
+        echo ""
+        echo "=== Postgres Logs ==="
+        cat postgres-logs.txt 2>/dev/null || echo "No Postgres logs available"
+        echo ""
+        echo "=== ${{ inputs.service-name }} Logs ==="
+        cat service-logs.txt 2>/dev/null || echo "No service logs available"
+
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bruno-test-results-${{ inputs.service-name }}-${{ github.sha }}
+        path: bruno_results
+        retention-days: 5
+
+    - name: Upload service logs on failure
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: integration-service-logs-${{ inputs.service-name }}-${{ github.sha }}
+        path: |
+          keycloak-logs.txt
+          postgres-logs.txt
+          service-logs.txt
+        retention-days: 5
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf
+      if: always()
+      with:
+        files: bruno_results/report.xml
+        check_name: Integration Test Results - ${{ inputs.service-name }}
+
+    - name: Cleanup containers
+      if: always()
+      run: |
+        echo "Cleaning up containers..."
+        docker stop ${{ inputs.service-name }}_container || true
+        docker rm ${{ inputs.service-name }}_container || true
+        docker compose down -v || true

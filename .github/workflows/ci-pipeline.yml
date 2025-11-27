@@ -1,0 +1,86 @@
+﻿name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  BUILD_CONFIGURATION: 'Release'
+  SONAR_ORGANIZATION: 'personalprojcts'
+  SONAR_PROJECT_KEY: 'mayconht_Aristotle_Study'
+
+jobs:
+  # ===================================
+  # BUILD + TEST + SONARCLOUD STAGE
+  # ===================================
+  build-test-sonar:
+    name: Build, Test & SonarCloud Analysis
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    uses: ./.github/workflows/build-test-sonar.yml
+    with:
+      dotnet-version: '8.0.x'
+      build-configuration: 'Release'
+      sonar-organization: 'personalprojcts'
+      sonar-project-key: 'mayconht_Aristotle_Study'
+      test-project-path: 'USR/UserServiceTests/UserService.UnitTests.csproj'
+      solution-path: 'Aristotle_Study.sln'
+      build-artifact-name: 'build-state-${{ github.sha }}'
+    secrets: inherit
+
+  # ===================================
+  # INTEGRATION TEST STAGE
+  # ===================================
+  integration-tests-userservice:
+    name: Integration Tests - UserService
+    needs: build-test-sonar
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      service-name: 'UserService'
+      service-path: 'USR/UserService'
+      docker-image-name: 'darkdollynho/usr_svc-aristotle:latest'
+      bruno-path: 'bruno/UserService API'
+      dotnet-version: '8.0.x'
+      build-artifact-name: 'build-state-${{ github.sha }}'
+      app-port: 3000
+      keycloak-port: 8080
+
+  # ===================================
+  # SUMMARY STAGE
+  # ===================================
+  pipeline-summary:
+    name: Pipeline Summary
+    needs: [build-test-sonar, integration-tests-userservice]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Check pipeline status
+      run: |
+        echo "## Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Build, Test & SonarCloud | ${{ needs.build-test-sonar.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Integration Tests | ${{ needs.integration-tests-userservice.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+

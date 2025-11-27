@@ -1,0 +1,15 @@
+meta {
+  name: Wipes the entire user database. This action is irreversible and should only be used in development environments. Requires Admin role.
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/User/wipe
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 204
+}

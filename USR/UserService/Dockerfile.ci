@@ -1,0 +1,18 @@
+# Optimized Dockerfile for CI/CD Pipeline
+# This Dockerfile uses pre-built binaries from the build artifacts
+# to avoid rebuilding the application in the Docker image stage
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+
+# The build pipeline should copy artifacts to ./artifacts/bin/Release/net8.0/
+COPY ./artifacts/USR/UserService/bin/Release/net8.0/ .
+
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+USER $APP_UID
+
+ENTRYPOINT ["dotnet", "UserService.dll"]
