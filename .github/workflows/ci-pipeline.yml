@@ -33,7 +33,7 @@ jobs:
       dotnet-version: '8.0.x'
       build-configuration: 'Release'
       sonar-organization: 'personalprojcts'
-      sonar-project-key: 'mayconht_Aristotle_Study'
+      sonar-project-key: 'mayconht_Aristotle_Demo'
       test-project-path: 'USR/UserServiceTests/UserService.UnitTests.csproj'
       solution-path: 'Aristotle_Study.sln'
       build-artifact-name: 'build-state-${{ github.sha }}'
