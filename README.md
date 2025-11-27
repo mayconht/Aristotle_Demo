@@ -3,17 +3,17 @@
 <div align="center">
 
 [![Build, Unit & Integration Tests](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=alert_status&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=bugs&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=code_smells&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=coverage&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=duplicated_lines_density&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=ncloc&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=reliability_rating&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=security_rating&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=sqale_index&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=sqale_rating&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Study&metric=vulnerabilities&token=e169eb95d409b4f735ecdd4d9b7cf94422518e97)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Study)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=bugs)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=coverage)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
 
 </div>
 
@@ -213,7 +213,7 @@ The project is integrated with SonarCloud for code quality analysis. To configur
 
 1. **Access SonarCloud Settings**:
     - Go to [SonarCloud](https://sonarcloud.io/) and log in
-    - Select your project `mayconht_Aristotle_Study`
+    - Select your project `mayconht_Aristotle_Demo`
     - Navigate to "Administration" > "Analysis Method"
 
 2. **Configure Analysis Method**:
