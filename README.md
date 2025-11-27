@@ -1,5 +1,8 @@
 # Aristotle Study - User Management API
 
+*This project serves as a learning exercise comparing C#/.NET development patterns with Java/Spring Boot, focusing on
+Clean Architecture principles and modern development practices.*
+
 <div align="center">
 
 [![Build, Unit & Integration Tests](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml)
@@ -24,8 +27,8 @@ Keep in mind that this is a simple project for educational purposes and many imp
 
 - **.NET 8.0** - Target framework
 - **ASP.NET Core Web API** - Web framework
-- **Entity Framework Core 9.0** - ORM with SQLite and PostgreSQL providers
-- **PostgreSQL** - Alternative database (configurable)
+- **Entity Framework Core 9.0** - ORM with PostgreSQL provider
+- **PostgreSQL** - Alternative database
 - **AutoMapper** - Object-to-object mapping
 - **DotNetEnv** - Environment variable loader
 - **Swagger/OpenAPI** - API documentation (Swashbuckle.AspNetCore)
@@ -35,6 +38,14 @@ Keep in mind that this is a simple project for educational purposes and many imp
 - **Docker** - Containerization
 - **Keycloak** - OAuth2/OIDC identity provider for authentication
 - **JWT Bearer** - Token-based authentication
+
+## Pipelines
+<div align="center">
+<img width="769" height="376" alt="image" src="https://github.com/user-attachments/assets/df6efdf8-cb2b-4731-a5e2-4e78a855e76b" />
+
+
+<img width="1181" height="722" alt="image" src="https://github.com/user-attachments/assets/e4f1d6b3-36d9-4f28-8cbe-0ccd068b6116" />
+</div>
 
 ## Architecture
 
@@ -223,18 +234,6 @@ The project is integrated with SonarCloud for code quality analysis. To configur
 3. **Required GitHub Secrets**:
     - `SONAR_TOKEN`: Your SonarCloud API token (from SonarCloud user settings)
 
-### Local SonarQube Setup (Optional)
-
-For local code quality analysis, you can run SonarQube using Docker Compose:
-
-```bash
-# Start SonarQube and PostgreSQL
-docker-compose up -d
-
-# Access SonarQube at http://localhost:9000
-# Default credentials: admin/admin
-```
-
 ### Hot Reload Feature
 
 The application supports hot reload with `dotnet watch` which provides:
@@ -244,33 +243,6 @@ The application supports hot reload with `dotnet watch` which provides:
 - **Real-time feedback** for development
 
 > **Tip**: You'll see hot reload messages in the terminal when files are changed and recompiled.
-
-### Available Endpoints
-
-The API provides user management functionality. Check the Swagger documentation for complete API details:
-
-- `GET /api/users` - Get all users
-- `GET /api/users/{id}` - Get user by ID
-- `PUT /api/users/{id}` - Update user
-- `DELETE /api/users/{id}` - Delete user
-
-**Note**: User creation is handled automatically through JIT provisioning on first login via Keycloak.
-
-### Database
-
-The project uses SQLite with Entity Framework Core:
-
-- **Database file**: `users.db` (created automatically)
-- **Migrations**: Located in `Migrations/` folder
-- **Context**: `ApplicationDbContext` in Infrastructure layer
-
-To create new migrations:
-
-```bash
-cd UserService
-dotnet ef migrations add <MigrationName>
-dotnet ef database update
-```
 
 ### Development Workflow
 
@@ -282,77 +254,6 @@ dotnet ef database update
 6. Run tests to make sure everything works
 7. Repeat!
 
-### Project Structure
-
-```
-Aristotle_Study/
-├── Aristotle_Study.sln          # Solution file
-├── coverlet.runsettings         # Code coverage settings
-├── Dockerfile                   # Docker configuration
-├── global.json                  # .NET SDK version
-├── README.md                    # This file
-├── UserService/                 # Main ASP.NET Core Web API project
-│   ├── appsettings.Development.json
-│   ├── appsettings.json
-│   ├── Program.cs
-│   ├── UserService.csproj
-│   ├── Application/             # Application services and logic
-│   │   ├── MappingProfile.cs
-│   │   ├── UserValidator.cs
-│   │   ├── DTOs/
-│   │   ├── Exceptions/
-│   │   └── Service/
-│   ├── Controllers/             # API controllers
-│   │   └── UserController.cs
-│   ├── Domain/                  # Domain entities and interfaces
-│   │   ├── Entities/
-│   │   ├── Exceptions/
-│   │   └── Interfaces/
-│   ├── Infrastructure/          # Data access and external concerns
-│   │   ├── ApplicationDbContext.cs
-│   │   ├── Data/
-│   │   ├── Exceptions/
-│   │   └── Middleware/
-│   ├── bin/
-│   └── obj/
-├── UserServiceTests/            # Unit tests for UserService
-│   ├── UserService.UnitTests.csproj
-│   ├── Application/
-│   │   ├── MappingProfileTests.cs
-│   │   ├── UserValidatorTests.cs
-│   │   ├── Controllers/
-│   │   ├── DTOs/
-│   │   └── Service/
-│   ├── Builders/
-│   │   └── UserBuilder.cs
-│   ├── Config/
-│   │   └── TestConfig.cs
-│   ├── Domain/
-│   │   ├── Entities/
-│   │   └── Exceptions/
-│   ├── Infrastructure/
-│   │   ├── ApplicationDbContextTests.cs
-│   │   ├── Data/
-│   │   └── Middleware/
-│   ├── bin/
-│   └── obj/
-├── Tests/                       # Additional test project
-│   ├── bin/
-│   └── obj/
-├── ISTQB/                       # ISTQB study materials
-│   ├── StartHere.md
-│   └── 1_Fundamentals-Of-Testing/
-│       └── 1_Fundamentals.md
-├── bruno/                       # API testing with Bruno
-│   └── UserService API/
-│       ├── bruno.json
-│       ├── collection.bru
-│       ├── environments/
-│       └── User API Regression Test/
-└── Aristotle_Project/           # Legacy project directory
-    ├── bin/
-    └── obj/
-```
 
 ### Testing Strategy
 
@@ -370,7 +271,7 @@ Test frameworks used:
 - xUnit for test execution
 - Moq for mocking dependencies
 - Bogus for generating fake test data
-- Verify for snapshot testing
+- Verify for snapshot testing - TODO
 
 ### API Testing with Bruno
 
@@ -400,7 +301,6 @@ or even download the [Bruno Desktop App](https://www.usebruno.com/download).
 
 This is an educational project, but contributions are welcome! Areas for improvement include:
 
-- Increase test coverage from 45% to 80%
 - Fix .NET compiler warnings
 - Address SonarQube security hotspots
 - Add integration tests
@@ -411,8 +311,6 @@ This is an educational project, but contributions are welcome! Areas for improve
 ### Troubleshooting
 
 **Port Issues**: If default ports are in use, modify the URLs in `Properties/launchSettings.json`
-
-**Database Issues**: Delete `users.db` file to reset the database (it will be recreated automatically)
 
 **Build Issues**: Run `dotnet clean` followed by `dotnet restore` and `dotnet build`
 
