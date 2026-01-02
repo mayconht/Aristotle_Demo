@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using Aristotle.DevTools.Commands;
 
-var rootCommand = new RootCommand("Aristotle DevTools - Development utilities for Aristotle Study platform");
+var rootCommand = new RootCommand("Aristotle DevTools - Development utilities for Aristotle Demo platform");
 
 // Add keycloak command
 var keycloakCommand = new Command("keycloak", "Keycloak configuration and management");

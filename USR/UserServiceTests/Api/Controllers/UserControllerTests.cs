@@ -157,7 +157,6 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(200, okResult.StatusCode);
 
-        // Verify result structure using reflection
         Assert.NotNull(okResult.Value);
         var resultType = okResult.Value.GetType();
         var claimsProperty = resultType.GetProperty("claims");

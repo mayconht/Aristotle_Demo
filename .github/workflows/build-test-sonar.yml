@@ -22,7 +22,7 @@ on:
         description: 'SonarCloud project key'
         required: false
         type: string
-        default: 'mayconht_Aristotle_Study'
+        default: 'mayconht_Aristotle_Demo'
       test-project-path:
         description: 'Path to the test project'
         required: false
@@ -32,7 +32,7 @@ on:
         description: 'Path to the solution file'
         required: false
         type: string
-        default: 'Aristotle_Study.sln'
+        default: 'Aristotle_Demo.sln'
       build-artifact-name:
         description: 'Name for the build artifact'
         required: true
