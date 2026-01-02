@@ -109,7 +109,7 @@ public class ServiceOperationExceptionTests
         var innerException = new Exception("Error");
 
         // Act & Assert
-        Exception? caughtException = null;
+        Exception? caughtException;
         try
         {
             throw new ServiceOperationException(service, operation, message, innerException);
@@ -141,7 +141,7 @@ public class ServiceOperationExceptionTests
         // Ensure Operation property doesn't have a public setter
         var propertyInfo = typeof(ServiceOperationException).GetProperty("Operation");
         Assert.NotNull(propertyInfo);
-        Assert.Null(propertyInfo!.SetMethod);
+        Assert.Null(propertyInfo.SetMethod);
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public class ServiceOperationExceptionTests
         const string service = "UserService";
         const string operation = "ProcessUser";
         const string message = "Processing failed";
-        var innerException = new ArgumentNullException("userId", "User ID cannot be null");
+        var innerException = new ArgumentNullException($"userId", "User ID cannot be null");
 
         // Act
         var exception = new ServiceOperationException(service, operation, message, innerException);

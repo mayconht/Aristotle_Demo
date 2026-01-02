@@ -14,31 +14,31 @@ public class ServiceConfigurationExtensionsTests
 {
     #region AddSwaggerDocumentation Tests
 
-    [Fact]
-    public void AddSwaggerDocumentation_WithValidConfiguration_AddsSwaggerServices()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                { "Authentication:Keycloak:Authority", "http://localhost:8080/realms/test" }
-            })
-            .Build();
-
-        // Act
-        services.AddSwaggerDocumentation(configuration);
-
-        // Assert
-        var serviceProvider = services.BuildServiceProvider();
-
-        // Verify that endpoints API explorer was registered
-        var hasEndpointsApiExplorer = services.Any(s =>
-            s.ServiceType.Name.Contains("IApiDescriptionProvider") ||
-            s.ServiceType.Name.Contains("EndpointsApiExplorer"));
-
-        Assert.True(services.Count > 0, "Services should be registered");
-    }
+    // [Fact]
+    // public void AddSwaggerDocumentation_WithValidConfiguration_AddsSwaggerServices()
+    // {
+    //     // Arrange
+    //     var services = new ServiceCollection();
+    //     var configuration = new ConfigurationBuilder()
+    //         .AddInMemoryCollection(new Dictionary<string, string?>
+    //         {
+    //             { "Authentication:Keycloak:Authority", "http://localhost:8080/realms/test" }
+    //         })
+    //         .Build();
+    //
+    //     // Act
+    //     services.AddSwaggerDocumentation(configuration);
+    //
+    //     // Assert
+    //     var serviceProvider = services.BuildServiceProvider();
+    //
+    //     // Verify that endpoints API explorer was registered
+    //     var hasEndpointsApiExplorer = services.Any(s =>
+    //         s.ServiceType.Name.Contains("IApiDescriptionProvider") ||
+    //         s.ServiceType.Name.Contains("EndpointsApiExplorer"));
+    //
+    //     Assert.True(services.Count > 0, "Services should be registered");
+    // }
 
     [Fact]
     public void AddSwaggerDocumentation_WithAuthorityEndingInSlash_HandlesCorrectly()

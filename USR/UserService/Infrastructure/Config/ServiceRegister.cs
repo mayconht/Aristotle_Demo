@@ -19,7 +19,7 @@ public static class RegisterService
     /// <param name="internalBuilder"></param>
     public static void Initialize(WebApplicationBuilder internalBuilder)
     {
-        internalBuilder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
+        internalBuilder.Services.AddAutoMapper(_ => { }, typeof(MappingProfile));
         internalBuilder.Services.AddScoped<IUserRepository, UserRepository>();
         internalBuilder.Services.AddScoped<IUserValidator, UserValidator>();
         internalBuilder.Services.AddScoped<IUserService, UserService>();

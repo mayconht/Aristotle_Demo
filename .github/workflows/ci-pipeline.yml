@@ -16,7 +16,7 @@ env:
   DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: 'Release'
   SONAR_ORGANIZATION: 'personalprojcts'
-  SONAR_PROJECT_KEY: 'mayconht_Aristotle_Study'
+  SONAR_PROJECT_KEY: 'mayconht_Aristotle_Demo'
 
 jobs:
   # ===================================
@@ -35,7 +35,7 @@ jobs:
       sonar-organization: 'personalprojcts'
       sonar-project-key: 'mayconht_Aristotle_Demo'
       test-project-path: 'USR/UserServiceTests/UserService.UnitTests.csproj'
-      solution-path: 'Aristotle_Study.sln'
+      solution-path: 'Aristotle_Demo.sln'
       build-artifact-name: 'build-state-${{ github.sha }}'
     secrets: inherit
 

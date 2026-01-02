@@ -6,7 +6,6 @@ namespace Aristotle.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 ///     Entity Framework Core configuration for the User entity using Fluent API.
-///     This separates persistence concerns from the domain model.
 /// </summary>
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

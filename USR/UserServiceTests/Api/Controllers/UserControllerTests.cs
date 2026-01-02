@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Aristotle.Application.DTOs;
 using Aristotle.Application.Services;
 using Aristotle.Controllers;
@@ -157,7 +156,6 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(200, okResult.StatusCode);
 
-        // Verify result structure using reflection
         Assert.NotNull(okResult.Value);
         var resultType = okResult.Value.GetType();
         var claimsProperty = resultType.GetProperty("claims");
@@ -262,7 +260,7 @@ public class UserControllerTests
         Assert.NotNull(claimsValue);
 
         // Verify the claims object has expected properties
-        var claimsType = claimsValue!.GetType();
+        var claimsType = claimsValue.GetType();
         var allProperty = claimsType.GetProperty("all");
         Assert.NotNull(allProperty);
     }
@@ -372,17 +370,13 @@ public class UserControllerTests
     [Fact]
     public async Task GetAllUsers_WithNoUsers_ReturnsOkWithEmptyList()
     {
-        // Arrange
-        var emptyUserList = new List<User>();
-        var emptyDtoList = new List<UserResponseDto>();
-
         _userServiceMock
             .Setup(s => s.GetAllUsersAsync())
-            .ReturnsAsync(emptyUserList);
+            .ReturnsAsync(new List<User>());
 
         _mapperMock
             .Setup(m => m.Map<IEnumerable<UserResponseDto>>(It.IsAny<IEnumerable<User>>()))
-            .Returns(emptyDtoList);
+            .Returns(new List<UserResponseDto>());
 
         // Act
         var result = await _controller.GetAllUsers();

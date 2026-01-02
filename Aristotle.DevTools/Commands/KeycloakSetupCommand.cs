@@ -9,24 +9,25 @@ namespace Aristotle.DevTools.Commands;
 //MOBILE CLIENT NOT ON THIS REPO, shall not be made public
 public static class KeycloakSetupCommand
 {
-    private const string keycloakUrl = "http://localhost:8080";
-    private const string adminUser = "admin";
-    private const string adminPassword = "admin";
-    private const string realmName = "userservice";
-    private const string clientId = "userservice-api";
-    private const string mobileClientId = "userservice-mobile";
+    private const string KeycloakUrl = "http://localhost:8080";
+    private const string AdminUser = "admin";
+    private const string AdminPassword = "admin";
+    private const string ConstRealmName = "userservice";
+    private const string ClientId = "userservice-api";
+    private const string MobileClientId = "userservice-mobile";
 
     public static async Task<int> ExecuteAsync()
     {
         Console.WriteLine("=== Keycloak Setup Automation ===\n");
 
-        using var httpClient = new HttpClient { BaseAddress = new Uri(keycloakUrl) };
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri(KeycloakUrl);
 
         try
         {
             // 1. Get admin token
             Console.WriteLine("1. Obtaining admin token...");
-            var adminToken = await GetAdminTokenAsync(httpClient, adminUser, adminPassword);
+            var adminToken = await GetAdminTokenAsync(httpClient, AdminUser, AdminPassword);
             if (string.IsNullOrEmpty(adminToken))
             {
                 Console.WriteLine("ERROR: Failed to obtain admin token");
@@ -38,40 +39,40 @@ public static class KeycloakSetupCommand
 
             // 2. Create realm
             Console.WriteLine("2. Creating realm 'userservice'...");
-            var realmCreated = await CreateRealmAsync(httpClient, realmName);
+            var realmCreated = await CreateRealmAsync(httpClient, ConstRealmName);
             Console.WriteLine(realmCreated ? "Realm created" : "Realm already exists");
             Console.WriteLine();
 
             // 3. Create client
             Console.WriteLine("3. Creating OAuth2 client 'userservice-api'...");
-            var clientCreated = await CreateClientAsync(httpClient, realmName, clientId);
+            var clientCreated = await CreateClientAsync(httpClient, ConstRealmName, ClientId);
             Console.WriteLine(clientCreated ? "Client created" : "Client already exists");
             Console.WriteLine();
 
             // 4. Configure client settings
             Console.WriteLine("4. Configuring client settings...");
-            await ConfigureClientAsync(httpClient, realmName, clientId);
+            await ConfigureClientAsync(httpClient, ConstRealmName, ClientId);
             Console.WriteLine("Client configured\n");
 
             // 5. Create realm roles
             Console.WriteLine("5. Creating realm roles...");
-            await CreateRoleAsync(httpClient, realmName, "Admins");
-            await CreateRoleAsync(httpClient, realmName, "Managers");
-            await CreateRoleAsync(httpClient, realmName, "Users");
+            await CreateRoleAsync(httpClient, ConstRealmName, "Admins");
+            await CreateRoleAsync(httpClient, ConstRealmName, "Managers");
+            await CreateRoleAsync(httpClient, ConstRealmName, "Users");
             Console.WriteLine("Roles created\n");
 
             // 6. Create groups
             Console.WriteLine("6. Creating groups...");
-            await CreateGroupAsync(httpClient, realmName, "admin-group");
-            await CreateGroupAsync(httpClient, realmName, "manager-group");
-            await CreateGroupAsync(httpClient, realmName, "user-group");
+            await CreateGroupAsync(httpClient, ConstRealmName, "admin-group");
+            await CreateGroupAsync(httpClient, ConstRealmName, "manager-group");
+            await CreateGroupAsync(httpClient, ConstRealmName, "user-group");
             Console.WriteLine("Groups created\n");
 
             // 7. Assign roles to groups
             Console.WriteLine("7. Assigning roles to groups...");
-            await AssignRoleToGroupAsync(httpClient, realmName, "admin-group", "Admins");
-            await AssignRoleToGroupAsync(httpClient, realmName, "manager-group", "Managers");
-            await AssignRoleToGroupAsync(httpClient, realmName, "user-group", "Users");
+            await AssignRoleToGroupAsync(httpClient, ConstRealmName, "admin-group", "Admins");
+            await AssignRoleToGroupAsync(httpClient, ConstRealmName, "manager-group", "Managers");
+            await AssignRoleToGroupAsync(httpClient, ConstRealmName, "user-group", "Users");
             Console.WriteLine("Roles assigned to groups\n");
 
             // 8. Create test users
@@ -85,38 +86,38 @@ public static class KeycloakSetupCommand
 
             foreach (var userInfo in users)
             {
-                await CreateUserWithGroupAsync(httpClient, realmName, userInfo);
+                await CreateUserWithGroupAsync(httpClient, ConstRealmName, userInfo);
             }
             Console.WriteLine("Test users created\n");
 
             // 9. Add protocol mappers
             Console.WriteLine("9. Configuring protocol mappers...");
-            await AddProtocolMappersAsync(httpClient, realmName, clientId);
+            await AddProtocolMappersAsync(httpClient, ConstRealmName, ClientId);
             Console.WriteLine("Protocol mappers configured\n");
 
             // 10. Get and regenerate client secret
             Console.WriteLine("10. Generating client secret...");
-            var clientSecret = await RegenerateClientSecretAsync(httpClient, realmName, clientId);
+            var clientSecret = await RegenerateClientSecretAsync(httpClient, ConstRealmName, ClientId);
 
             // 11. Create mobile public client
             Console.WriteLine("11. Creating mobile public client 'userservice-mobile'...");
-            var mobileClientCreated = await CreateMobileClientAsync(httpClient, realmName, mobileClientId);
+            var mobileClientCreated = await CreateMobileClientAsync(httpClient, ConstRealmName, MobileClientId);
             Console.WriteLine(mobileClientCreated ? "Mobile client created" : "Mobile client already exists");
             Console.WriteLine();
 
             // 12. Configure mobile client settings
             Console.WriteLine("12. Configuring mobile client settings...");
-            await ConfigureMobileClientAsync(httpClient, realmName, mobileClientId);
+            await ConfigureMobileClientAsync(httpClient, ConstRealmName, MobileClientId);
             Console.WriteLine("Mobile client configured\n");
 
             // 13. Add protocol mappers to mobile client
             Console.WriteLine("13. Configuring mobile client protocol mappers...");
-            await AddProtocolMappersAsync(httpClient, realmName, mobileClientId);
+            await AddProtocolMappersAsync(httpClient, ConstRealmName, MobileClientId);
             Console.WriteLine("Mobile client protocol mappers configured\n");
 
             // 14. Assign Admin role to API service account
             Console.WriteLine("14. Assigning Admin role to API service account...");
-            await AssignRoleToServiceAccountAsync(httpClient, realmName, clientId, "Admins");
+            await AssignRoleToServiceAccountAsync(httpClient, ConstRealmName, ClientId, "Admins");
             Console.WriteLine("Admin role assigned to service account\n");
 
             Console.WriteLine("\n=== SETUP COMPLETED SUCCESSFULLY ===");
@@ -124,7 +125,7 @@ public static class KeycloakSetupCommand
             Console.WriteLine("\nAdd this to your .env file:");
             Console.WriteLine($"KEYCLOAK_CLIENT_SECRET={clientSecret}");
             Console.WriteLine("\n--- Mobile App Configuration (Public Client with PKCE) ---");
-            Console.WriteLine($"Client ID: {mobileClientId}");
+            Console.WriteLine($"Client ID: {MobileClientId}");
             Console.WriteLine("Client Type: Public (No secret required)");
             Console.WriteLine("PKCE: Required (S256)");
             Console.WriteLine("Redirect URIs:");
@@ -231,11 +232,11 @@ public static class KeycloakSetupCommand
         await client.PutAsJsonAsync($"/admin/realms/{realmName}/clients/{clientUuid}", updatePayload);
     }
 
-    private static async Task<bool> CreateMobileClientAsync(HttpClient client, string realmName, string clientId)
+    private static async Task<bool> CreateMobileClientAsync(HttpClient client, string internalRealmName, string internalClientId)
     {
         var clientPayload = new
         {
-            clientId,
+            clientId = internalClientId,
             name = "Mobile App Client",
             description = "Public client for mobile applications using PKCE",
             enabled = true,
@@ -264,17 +265,17 @@ public static class KeycloakSetupCommand
             }
         };
 
-        var response = await client.PostAsJsonAsync($"/admin/realms/{realmName}/clients", clientPayload);
+        var response = await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/clients", clientPayload);
         return response.IsSuccessStatusCode;
     }
 
-    private static async Task ConfigureMobileClientAsync(HttpClient client, string realmName, string clientId)
+    private static async Task ConfigureMobileClientAsync(HttpClient client, string internalRealmName, string internalClientId)
     {
-        var clientUuid = await GetClientUuidAsync(client, realmName, clientId);
+        var clientUuid = await GetClientUuidAsync(client, internalRealmName, internalClientId);
         if (string.IsNullOrEmpty(clientUuid)) return;
 
         // Get current configuration
-        var getResponse = await client.GetAsync($"/admin/realms/{realmName}/clients/{clientUuid}");
+        var getResponse = await client.GetAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}");
         if (!getResponse.IsSuccessStatusCode) return;
 
         var clientConfig = await getResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
@@ -302,31 +303,34 @@ public static class KeycloakSetupCommand
             };
         }
 
-        await client.PutAsJsonAsync($"/admin/realms/{realmName}/clients/{clientUuid}", clientConfig);
+        await client.PutAsJsonAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}", clientConfig);
     }
 
-    private static async Task<bool> CreateRoleAsync(HttpClient client, string realmName, string roleName)
+    private static async Task CreateRoleAsync(HttpClient client, string internalRealmName, string roleName)
     {
         var rolePayload = new { name = roleName, description = $"{roleName} role" };
-        var response = await client.PostAsJsonAsync($"/admin/realms/{realmName}/roles", rolePayload);
-        return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Conflict;
+        // var response = await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/roles", rolePayload);
+        await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/roles", rolePayload);
+        // return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Conflict;
     }
 
-    private static async Task<bool> CreateGroupAsync(HttpClient client, string realmName, string groupName)
+    private static async Task CreateGroupAsync(HttpClient client, string internalRealmName, string groupName)
     {
         var groupPayload = new { name = groupName };
-        var response = await client.PostAsJsonAsync($"/admin/realms/{realmName}/groups", groupPayload);
-        return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Conflict;
+await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/groups", groupPayload);
+        // var response = await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/groups", groupPayload);
+
+        // return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.Conflict;
     }
 
-    private static async Task AssignRoleToGroupAsync(HttpClient client, string realmName, string groupName, string roleName)
+    private static async Task AssignRoleToGroupAsync(HttpClient client, string internalRealmName, string groupName, string roleName)
     {
-        var groupId = await GetGroupIdAsync(client, realmName, groupName);
-        var role = await GetRoleAsync(client, realmName, roleName);
+        var groupId = await GetGroupIdAsync(client, internalRealmName, groupName);
+        var role = await GetRoleAsync(client, internalRealmName, roleName);
 
         if (string.IsNullOrEmpty(groupId) || role == null) return;
 
-        await client.PostAsJsonAsync($"/admin/realms/{realmName}/groups/{groupId}/role-mappings/realm", new[] { role });
+        await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/groups/{groupId}/role-mappings/realm", new[] { role });
     }
 
     private static async Task AssignRoleToServiceAccountAsync(HttpClient client, string realmName, string clientIdParam, string roleName)
@@ -350,7 +354,7 @@ public static class KeycloakSetupCommand
         await client.PostAsJsonAsync($"/admin/realms/{realmName}/users/{serviceAccount.Id}/role-mappings/realm", new[] { role });
     }
 
-    private static async Task<bool> CreateUserWithGroupAsync(HttpClient client, string realmName, UserInfo userInfo)
+    private static async Task CreateUserWithGroupAsync(HttpClient client, string internalRealmName, UserInfo userInfo)
     {
         var userPayload = new
         {
@@ -364,29 +368,29 @@ public static class KeycloakSetupCommand
             credentials = new[] { new { type = "password", value = userInfo.Password, temporary = false } }
         };
 
-        var response = await client.PostAsJsonAsync($"/admin/realms/{realmName}/users", userPayload);
+        var response = await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/users", userPayload);
         if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.Conflict)
         {
             Console.WriteLine($"  Failed to create user '{userInfo.Username}'");
-            return false;
+            // return false;
         }
 
-        var userId = await GetUserIdAsync(client, realmName, userInfo.Username);
-        var groupId = await GetGroupIdAsync(client, realmName, userInfo.GroupName);
+        var userId = await GetUserIdAsync(client, internalRealmName, userInfo.Username);
+        var groupId = await GetGroupIdAsync(client, internalRealmName, userInfo.GroupName);
 
         if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(groupId))
         {
-            await client.PutAsync($"/admin/realms/{realmName}/users/{userId}/groups/{groupId}", null);
+            await client.PutAsync($"/admin/realms/{internalRealmName}/users/{userId}/groups/{groupId}", null);
             Console.WriteLine($"  User '{userInfo.Username}' created and assigned to '{userInfo.GroupName}'");
-            return true;
+            // return true;
         }
 
-        return false;
+        // return false;
     }
 
-    private static async Task AddProtocolMappersAsync(HttpClient client, string realmName, string clientId)
+    private static async Task AddProtocolMappersAsync(HttpClient client, string internalRealmName, string internalClientId)
     {
-        var clientUuid = await GetClientUuidAsync(client, realmName, clientId);
+        var clientUuid = await GetClientUuidAsync(client, internalRealmName, internalClientId);
         if (string.IsNullOrEmpty(clientUuid)) return;
 
         var roleMapper = new
@@ -420,20 +424,20 @@ public static class KeycloakSetupCommand
             }
         };
 
-        await client.PostAsJsonAsync($"/admin/realms/{realmName}/clients/{clientUuid}/protocol-mappers/models", roleMapper);
-        await client.PostAsJsonAsync($"/admin/realms/{realmName}/clients/{clientUuid}/protocol-mappers/models", groupMapper);
+        await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}/protocol-mappers/models", roleMapper);
+        await client.PostAsJsonAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}/protocol-mappers/models", groupMapper);
     }
 
-    private static async Task<string?> RegenerateClientSecretAsync(HttpClient client, string realmName, string clientId)
+    private static async Task<string?> RegenerateClientSecretAsync(HttpClient client, string internalRealmName, string internalClientId)
     {
         // Use a fixed secret for CI/CD consistency
         const string fixedSecret = "dev-client-secret-12345";
 
-        var clientUuid = await GetClientUuidAsync(client, realmName, clientId);
+        var clientUuid = await GetClientUuidAsync(client, internalRealmName, internalClientId);
         if (string.IsNullOrEmpty(clientUuid)) return null;
 
         // Get current client configuration
-        var getResponse = await client.GetAsync($"/admin/realms/{realmName}/clients/{clientUuid}");
+        var getResponse = await client.GetAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}");
         if (!getResponse.IsSuccessStatusCode)
         {
             Console.WriteLine($"Failed to get client configuration");
@@ -446,13 +450,13 @@ public static class KeycloakSetupCommand
         // Update client with the fixed secret
         clientConfig["secret"] = fixedSecret;
 
-        var updateResponse = await client.PutAsJsonAsync($"/admin/realms/{realmName}/clients/{clientUuid}", clientConfig);
+        var updateResponse = await client.PutAsJsonAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}", clientConfig);
 
         if (!updateResponse.IsSuccessStatusCode)
         {
             Console.WriteLine($"Failed to set fixed client secret, using regenerate endpoint...");
             // Fallback to regenerate if setting specific secret fails
-            var response = await client.PostAsync($"/admin/realms/{realmName}/clients/{clientUuid}/client-secret", null);
+            var response = await client.PostAsync($"/admin/realms/{internalRealmName}/clients/{clientUuid}/client-secret", null);
             if (!response.IsSuccessStatusCode) return null;
 
             var secretResponse = await response.Content.ReadFromJsonAsync<ClientSecret>();
@@ -503,7 +507,7 @@ public static class KeycloakSetupCommand
         [property: JsonPropertyName("expires_in")] int ExpiresIn
     );
 
-    private record Client(string Id, string ClientId);
+    private record Client(string Id);
     private record ClientSecret(string Value);
     private record Group(string Id, string Name);
     private record User(string Id, string Username);
