@@ -5,7 +5,7 @@ Clean Architecture principles and modern development practices.*
 
 <div align="center">
 
-[![Build, Unit & Integration Tests](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/mayconht/Aristotle_Study/actions/workflows/ci-pipeline.yml)
+[![Build, Unit & Integration Tests](https://github.com/mayconht/Aristotle_Demo/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/mayconht/Aristotle_Demo/actions/workflows/ci-pipeline.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=bugs)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=mayconht_Aristotle_Demo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=mayconht_Aristotle_Demo)
@@ -217,22 +217,6 @@ start ./TestResults/Report/index.html  # Windows
 ```
 
 The coverage report helps identify areas that need additional testing to meet our 80% coverage target.
-
-### SonarCloud Integration
-
-The project is integrated with SonarCloud for code quality analysis. To configure SonarCloud properly:
-
-1. **Access SonarCloud Settings**:
-    - Go to [SonarCloud](https://sonarcloud.io/) and log in
-    - Select your project `mayconht_Aristotle_Demo`
-    - Navigate to "Administration" > "Analysis Method"
-
-2. **Configure Analysis Method**:
-    - Disable "Automatic Analysis" if you're using CI-based analysis
-    - Or vice versa (don't run both simultaneously)
-
-3. **Required GitHub Secrets**:
-    - `SONAR_TOKEN`: Your SonarCloud API token (from SonarCloud user settings)
 
 ### Hot Reload Feature
 
