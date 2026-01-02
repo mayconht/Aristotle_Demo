@@ -27,8 +27,8 @@ Keep in mind that this is a simple project for educational purposes and many imp
 
 - **.NET 8.0** - Target framework
 - **ASP.NET Core Web API** - Web framework
-- **Entity Framework Core 9.0** - ORM with PostgreSQL provider
-- **PostgreSQL** - Alternative database
+- **Entity Framework Core 8.0** - ORM with PostgreSQL provider
+- **PostgreSQL** - Database (PostgreSQL 15)
 - **AutoMapper** - Object-to-object mapping
 - **DotNetEnv** - Environment variable loader
 - **Swagger/OpenAPI** - API documentation (Swashbuckle.AspNetCore)
@@ -82,6 +82,8 @@ The project follows Clean Architecture principles with the following layers:
 - **CreatedAt**: DateTime (User creation timestamp)
 - **LastLoginAt**: DateTime? (Last login timestamp)
 
+**Note on Database:** The project uses EF Core's code-first approach. Database schema is created automatically on application startup based on entity configurations in `Infrastructure/Persistence/Configurations/`.
+
 ## API Endpoints
 
 All endpoints require authentication via JWT Bearer token obtained from Keycloak.
@@ -118,7 +120,7 @@ cp .env.example .env
 docker-compose up -d postgres keycloak
 
 # 3. Run automated Keycloak setup
-cd Scripts/Aristotle.DevTools
+cd Aristotle.DevTools
 dotnet run -- keycloak setup
 
 # 4. Copy the generated client secret to .env
@@ -138,13 +140,13 @@ This automated setup creates:
 dotnet run -- keycloak test
 ```
 
-See [DevTools README](Scripts/Aristotle.DevTools/README.md) for more details.
+See [DevTools README](Aristotle.DevTools/README.md) for more details.
 
 ## Running the Project
 
 ### Option 1: Docker Compose (Recommended)
 
-Runs complete stack (Keycloak + API):
+Runs infrastructure services (Keycloak + PostgreSQL):
 
 ```bash
 cp .env.example .env
@@ -153,8 +155,9 @@ docker compose up -d
 
 Access:
 - **Keycloak**: http://localhost:8080
-- **API**: http://localhost:3000
-- **Swagger**: http://localhost:3000/swagger
+- **PostgreSQL**: localhost:5432
+
+**Note:** The UserService container configuration exists in docker-compose.yml but is currently commented out. For local development, use Option 2 below.
 
 ### Option 2: Local Development
 
@@ -189,8 +192,8 @@ dotnet test
 # Run tests with coverage
 dotnet test --collect:"XPlat Code Coverage"
 
-# Run from solution root
-dotnet test UserServiceTests/UserService.UnitTests.csproj
+# Run specific test project
+dotnet test USR/UserServiceTests/UserService.UnitTests.csproj
 ```
 
 ### Code Coverage
@@ -252,10 +255,9 @@ The project includes unit tests covering:
 
 Test frameworks used:
 
-- xUnit for test execution
+- xUnit v3 for test execution
 - Moq for mocking dependencies
 - Bogus for generating fake test data
-- Verify for snapshot testing - TODO
 
 ### API Testing with Bruno
 
@@ -269,7 +271,7 @@ follow these steps:
 
 2. **Run the Tests**:
    ```bash
-   bruno run bruno/UserService\ API/collection.bru
+   bruno run "bruno/UserService API"
    ```
 
 3. **View Reports**:
@@ -286,11 +288,12 @@ or even download the [Bruno Desktop App](https://www.usebruno.com/download).
 This is an educational project, but contributions are welcome! Areas for improvement include:
 
 - Fix .NET compiler warnings
-- Address SonarQube security hotspots
-- Add integration tests
+- Address SonarCloud security hotspots
+- Expand integration test coverage
 - Implement additional validators
 - Improve error handling
 - Add more comprehensive logging
+- Increase unit test coverage (target: 80%)
 
 ### Troubleshooting
 
