@@ -16,7 +16,8 @@ public static class KeycloakTestCommand
     {
         Console.WriteLine("=== KEYCLOAK VALIDATION TEST ===\n");
 
-        using var httpClient = new HttpClient { BaseAddress = new Uri(KeycloakUrl) };
+        using var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri(KeycloakUrl);
 
         Console.WriteLine("1. Testing authentication with user 'admin'...");
         var tokenResponse = await GetTokenAsync(httpClient, Realm, ClientId, ClientSecret, "admin", "admin123");
@@ -30,12 +31,12 @@ public static class KeycloakTestCommand
         Console.WriteLine($"OK: Token obtained successfully");
         Console.WriteLine($"Token Type: {tokenResponse.TokenType}");
         Console.WriteLine($"Expires In: {tokenResponse.ExpiresIn} seconds");
-        Console.WriteLine($"Access Token (first 50 chars): {tokenResponse.AccessToken?[..50]}...\n");
+        Console.WriteLine($"Access Token (first 50 chars): {tokenResponse.AccessToken[..50]}...\n");
 
         Console.WriteLine("2. Decoding and validating claims...");
-        var claims = ParseToken(tokenResponse.AccessToken!);
+        var claims = ParseToken(tokenResponse.AccessToken);
 
-        if (claims == null || !claims.HasValue)
+        if (claims == null)
         {
             Console.WriteLine("FAILURE: Could not decode token");
             return 1;
@@ -82,7 +83,7 @@ public static class KeycloakTestCommand
         return 0;
     }
 
-    private static async Task<TokenResponse?> GetTokenAsync(HttpClient client, string realmName, string client_id, string client_secret, string username, string password)
+    private static async Task<TokenResponse?> GetTokenAsync(HttpClient client, string realmName, string clientId, string clientSecret, string username, string password)
     {
         try
         {
@@ -91,8 +92,8 @@ public static class KeycloakTestCommand
             var content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["grant_type"] = "password",
-                ["client_id"] = client_id,
-                ["client_secret"] = client_secret,
+                ["client_id"] = clientId,
+                ["client_secret"] = clientSecret,
                 ["username"] = username,
                 ["password"] = password,
                 ["scope"] = "openid profile email roles"

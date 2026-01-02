@@ -121,17 +121,14 @@ public class DatabaseExceptionTests
     [Fact]
     public void DatabaseException_Properties_AreReadOnly()
     {
-        // Arrange & Act
-        var exception = new DatabaseException("Select", "Users", "Query error", "Syntax");
-
         // Assert
         var operationProperty = typeof(DatabaseException).GetProperty("Operation");
         var tableNameProperty = typeof(DatabaseException).GetProperty("TableName");
 
         Assert.NotNull(operationProperty);
         Assert.NotNull(tableNameProperty);
-        Assert.Null(operationProperty!.SetMethod);
-        Assert.Null(tableNameProperty!.SetMethod);
+        Assert.Null(operationProperty.SetMethod);
+        Assert.Null(tableNameProperty.SetMethod);
     }
 
     [Fact]

@@ -1,5 +1,4 @@
 using Aristotle.Application.Exceptions;
-using Aristotle.Application.Services;
 using Aristotle.Application.Validators;
 using Aristotle.Domain.Entities;
 using Aristotle.Domain.Interfaces;
@@ -91,7 +90,7 @@ public class UserServiceGetOperationsTests
 
         _userValidatorMock
             .Setup(v => v.ValidateGuid(emptyGuid))
-            .ThrowsAsync(new ArgumentNullException("externalUserId", "External User ID cannot be empty."));
+            .ThrowsAsync(new ArgumentNullException($"externalUserId", "External User ID cannot be empty."));
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(

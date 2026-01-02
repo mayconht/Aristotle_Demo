@@ -101,25 +101,19 @@ public class InfrastructureExceptionTests
     [Fact]
     public void InfrastructureException_Component_Property_IsReadOnly()
     {
-        // Arrange & Act
-        var exception = new TestInfrastructureException("TestComp", "Test message");
-
         // Assert
         var componentProperty = typeof(InfrastructureException).GetProperty("Component");
         Assert.NotNull(componentProperty);
-        Assert.Null(componentProperty!.SetMethod);
+        Assert.Null(componentProperty.SetMethod);
     }
 
     [Fact]
     public void InfrastructureException_ErrorCode_Property_IsReadOnly()
     {
-        // Arrange & Act
-        var exception = new TestInfrastructureException("TestComp", "Test message");
-
         // Assert
         var errorCodeProperty = typeof(InfrastructureException).GetProperty("ErrorCode");
         Assert.NotNull(errorCodeProperty);
-        Assert.Null(errorCodeProperty!.SetMethod);
+        Assert.Null(errorCodeProperty.SetMethod);
     }
 
     [Fact]
@@ -239,11 +233,5 @@ public class InfrastructureExceptionTests
     }
 
     // Test concrete implementation to test abstract base class
-    private class TestInfrastructureException : InfrastructureException
-    {
-        public TestInfrastructureException(string component, string message)
-            : base(component, message)
-        {
-        }
-    }
+    private class TestInfrastructureException(string component, string message) : InfrastructureException(component, message);
 }

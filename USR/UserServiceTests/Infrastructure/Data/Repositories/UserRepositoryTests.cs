@@ -130,6 +130,7 @@ public class UserRepositoryTests
     }
 
     [Fact]
+    //These tests are important to validate the Garbage Collector as well.
     public async Task AddAsync_ThrowsDatabaseException_OnContextDisposed()
     {
         var context = new ApplicationDbContext(_options);
@@ -159,8 +160,8 @@ public class UserRepositoryTests
     [Fact]
     public async Task UpdateAsync_UpdatesUser_WhenExists()
     {
+        //This seems weird as we don't have many properties on our class.
         var externalUserId = Guid.NewGuid();
-        var originalCategories = new List<Guid> { Guid.NewGuid() };
         var originalUser = new User { ExternalUserId = externalUserId };
 
         await using (var context = new ApplicationDbContext(_options))
@@ -169,7 +170,6 @@ public class UserRepositoryTests
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
-        var updatedCategories = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
         var updatedUser = new User { ExternalUserId = externalUserId };
 
         await using (var context = new ApplicationDbContext(_options))

@@ -134,38 +134,26 @@ public class ApplicationExceptionTests
     [Fact]
     public void ApplicationException_Service_Property_IsReadOnly()
     {
-        // Arrange
-        var innerException = new Exception("Inner");
-
-        // Act
-        var exception = new TestApplicationException("TestService", "Test message", innerException);
-
         // Assert
         var serviceProperty = typeof(ApplicationException).GetProperty("Service");
         Assert.NotNull(serviceProperty);
-        Assert.Null(serviceProperty!.SetMethod);
+        Assert.Null(serviceProperty.SetMethod);
     }
 
     [Fact]
     public void ApplicationException_ErrorCode_Property_IsReadOnly()
     {
-        // Arrange
-        var innerException = new Exception("Inner");
-
-        // Act
-        var exception = new TestApplicationException("TestService", "Test message", innerException);
-
         // Assert
         var errorCodeProperty = typeof(ApplicationException).GetProperty("ErrorCode");
         Assert.NotNull(errorCodeProperty);
-        Assert.Null(errorCodeProperty!.SetMethod);
+        Assert.Null(errorCodeProperty.SetMethod);
     }
 
     [Fact]
     public void ApplicationException_InnerException_ShouldBePreserved()
     {
         // Arrange
-        var innerException = new ArgumentNullException("userId", "User ID cannot be null");
+        var innerException = new ArgumentNullException($"userId", "User ID cannot be null");
 
         // Act
         var exception = new TestApplicationException("UserService", "Processing failed", innerException);

@@ -127,7 +127,7 @@ public class GlobalExceptionHandlingMiddlewareTests
     {
         // Arrange
         var context = CreateHttpContext();
-        var exception = new ArgumentException("Invalid argument", "testParam");
+        var exception = new ArgumentException("Invalid argument", $"testParam");
         _mockNext.Setup(x => x(context)).ThrowsAsync(exception);
 
         // Act
@@ -143,7 +143,7 @@ public class GlobalExceptionHandlingMiddlewareTests
     {
         // Arrange
         var context = CreateHttpContext();
-        var exception = new ArgumentNullException("testParam", "Test parameter is null");
+        var exception = new ArgumentNullException($"testParam", "Test parameter is null");
         _mockNext.Setup(x => x(context)).ThrowsAsync(exception);
 
         // Act

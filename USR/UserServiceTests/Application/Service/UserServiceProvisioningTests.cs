@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Aristotle.Application.Services;
 using Aristotle.Application.Validators;
 using Aristotle.Domain.Entities;
 using Aristotle.Domain.Interfaces;
