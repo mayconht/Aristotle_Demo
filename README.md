@@ -39,14 +39,6 @@ Keep in mind that this is a simple project for educational purposes and many imp
 - **Keycloak** - OAuth2/OIDC identity provider for authentication
 - **JWT Bearer** - Token-based authentication
 
-## Pipelines
-<div align="center">
-<img width="769" height="376" alt="image" src="https://github.com/user-attachments/assets/df6efdf8-cb2b-4731-a5e2-4e78a855e76b" />
-
-
-<img width="1181" height="722" alt="image" src="https://github.com/user-attachments/assets/e4f1d6b3-36d9-4f28-8cbe-0ccd068b6116" />
-</div>
-
 ## Architecture
 
 The project follows Clean Architecture principles with the following layers:
